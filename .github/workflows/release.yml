@@ -1,0 +1,58 @@
+name: Release Obsidian plugin
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - "manifest.json"
+      - "main.ts"
+      - "src/**"
+      - "styles.css"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Read version from manifest.json
+        id: v
+        run: echo "ver=$(jq -r .version manifest.json)" >> $GITHUB_OUTPUT
+
+      - name: Ensure git tag exists for version
+        run: |
+          if git rev-parse -q --verify "refs/tags/${{ steps.v.outputs.ver }}" >/dev/null; then
+            echo "Tag exists"
+          else
+            git config user.name "github-actions"
+            git config user.email "actions@github.com"
+            git tag "${{ steps.v.outputs.ver }}"
+            git push origin "refs/tags/${{ steps.v.outputs.ver }}"
+          fi
+
+      - name: Create GitHub release (uploads plugin files)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.v.outputs.ver }}
+          name: ${{ steps.v.outputs.ver }}
+          draft: false
+          files: |
+            manifest.json
+            main.js
+            styles.css
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
