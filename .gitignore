@@ -1,0 +1,38 @@
+# Build outputs
+main.js
+*.js.map
+lib/
+
+# Dependencies
+node_modules/
+
+# Python
+python/.venv/
+python/__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test coverage
+coverage/
+.nyc_output
+
+# Plugin data (when testing)
+file_state.json
+logs/
+
+# Temporary files
+*.tmp
+*.bak

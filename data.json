@@ -1,0 +1,17 @@
+{
+  "token": "ck-44dtKuKhHuJGKwBi4woeHS6AKZKtzekCKNiseKhbFG5B",
+  "tenant": "845fb430-70d0-4e9d-a86c-0f69c20e2036",
+  "database": "obsidian",
+  "collection": "obsidian_vault",
+  "batchSize": 100,
+  "includeGlobs": [
+    "**/*.md"
+  ],
+  "excludeGlobs": [
+    "**/.obsidian/**"
+  ],
+  "pythonPath": "python3",
+  "runOnOpen": true,
+  "tokenHeader": "X-Chroma-Token",
+  "logLevel": "debug"
+}
