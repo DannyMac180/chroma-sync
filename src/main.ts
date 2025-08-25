@@ -56,7 +56,7 @@ export default class ChromaSyncPlugin extends Plugin {
 		addIcon('play', `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 19,12 5,21"/></svg>`);
 		addIcon('stop', `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>`);
 		
-		this.ribbonIconEl = this.addRibbonIcon('sync', 'Sync to Chroma', async () => {
+		this.ribbonIconEl = this.addRibbonIcon('refresh-ccw', 'Sync to Chroma', async () => {
 			await this.handleRibbonClick();
 		});
 		this.ribbonIconEl.addClass('chroma-sync-ribbon-button');
@@ -300,12 +300,12 @@ export default class ChromaSyncPlugin extends Plugin {
 		// Use the plugin's current directory as the data folder
 		const adapter = this.app.vault.adapter as any;
 		const basePath = adapter.basePath || adapter.getBasePath?.() || '.';
-		const pluginDir = join(basePath, '.obsidian', 'plugins', 'obsidian-chroma-sync');
+		const pluginDir = join(basePath, '.obsidian', 'plugins', 'chroma-sync');
 		
 		// For development/installed plugins, use the plugin directory itself
 		// Check if we're already in the plugin directory
 		const currentDir = process.cwd();
-		if (currentDir.includes('obsidian-chroma-sync')) {
+		if (currentDir.includes('obsidian-chroma-sync') || currentDir.includes('chroma-sync')) {
 			return currentDir;
 		}
 		
@@ -562,7 +562,7 @@ ${logs}
 			this.ribbonIconEl.setAttribute('aria-label', 'Pause sync');
 		} else {
 			this.ribbonIconEl.innerHTML = '';
-			setIcon(this.ribbonIconEl, 'sync');
+			setIcon(this.ribbonIconEl, 'refresh-ccw');
 			this.ribbonIconEl.setAttribute('aria-label', 'Sync to Chroma');
 		}
 	}

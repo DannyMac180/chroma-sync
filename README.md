@@ -50,7 +50,7 @@ You'll need:
 ### Option 1: Manual Installation (Current)
 
 1. Download the latest release from [GitHub Releases](https://github.com/yourusername/obsidian-chroma-sync/releases)
-2. Extract the files to your vault's `.obsidian/plugins/obsidian-chroma-sync/` directory
+2. Extract the files to your vault's `.obsidian/plugins/chroma-sync/` directory
 3. Enable the plugin in Obsidian Settings → Community Plugins
 
 ### Option 2: From Obsidian Community Plugins (Future)
@@ -185,7 +185,7 @@ If Python setup fails:
 
 2. **Manual venv Creation**:
    ```bash
-   cd ~/.obsidian/plugins/obsidian-chroma-sync/python
+   cd ~/.obsidian/plugins/chroma-sync/python
    python3 -m venv .venv
    source .venv/bin/activate  # macOS/Linux
    # .venv\Scripts\activate   # Windows
