@@ -49,7 +49,7 @@ You'll need:
 
 ### Option 1: Manual Installation (Current)
 
-1. Download the latest release from [GitHub Releases](https://github.com/yourusername/obsidian-chroma-sync/releases)
+1. Download the latest release from [GitHub Releases](https://github.com/DannyMac180/chroma-sync/releases)
 2. Extract the files to your vault's `.obsidian/plugins/chroma-sync/` directory
 3. Enable the plugin in Obsidian Settings → Community Plugins
 
@@ -217,8 +217,8 @@ If Python setup fails:
 
 1. **Clone Repository**:
    ```bash
-   git clone https://github.com/yourusername/obsidian-chroma-sync.git
-   cd obsidian-chroma-sync
+   git clone https://github.com/DannyMac180/chroma-sync.git
+   cd chroma-sync
    ```
 
 2. **Install Dependencies**:
@@ -242,7 +242,7 @@ If Python setup fails:
 ### Project Structure
 
 ```
-obsidian-chroma-sync/
+chroma-sync/
 ├── src/
 │   ├── main.ts       # Plugin entry point
 │   ├── settings.ts   # Settings UI and schema
@@ -288,7 +288,7 @@ obsidian-chroma-sync/
 ### Getting Help
 
 1. **Check Logs**: Settings → Chroma Sync → Open Logs
-2. **GitHub Issues**: [Report issues](https://github.com/yourusername/obsidian-chroma-sync/issues)
+2. **GitHub Issues**: [Report issues](https://github.com/DannyMac180/chroma-sync/issues)
 3. **Obsidian Forum**: Community support
 4. **Documentation**: [Chroma Cloud docs](https://docs.trychroma.com)
 
