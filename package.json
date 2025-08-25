@@ -1,6 +1,6 @@
 {
   "name": "obsidian-chroma-sync",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Sync your Obsidian vault to Chroma Cloud for AI-powered search and retrieval.",
   "main": "main.js",
   "scripts": {
