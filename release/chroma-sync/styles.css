@@ -1,0 +1,114 @@
+/* Chroma Sync Plugin Styles */
+
+.chroma-sync-status-bar {
+    padding: 2px 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.chroma-sync-status-bar.syncing {
+    color: var(--text-accent);
+    animation: pulse 2s infinite;
+}
+
+.chroma-sync-status-bar.paused {
+    color: var(--text-warning);
+}
+
+.chroma-sync-status-bar.stopping {
+    color: var(--text-warning);
+    animation: fade 1s infinite alternate;
+}
+
+.chroma-sync-status-bar.error {
+    color: var(--text-error);
+}
+
+.chroma-sync-progress {
+    display: inline-block;
+    margin-left: 4px;
+}
+
+.chroma-sync-settings {
+    padding: 20px;
+}
+
+.chroma-sync-setting-item {
+    margin-bottom: 15px;
+}
+
+.chroma-sync-setting-item .setting-item-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.chroma-sync-setting-item .setting-item-description {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.chroma-sync-test-connection {
+    margin-top: 10px;
+}
+
+.chroma-sync-test-connection.success {
+    color: var(--text-success);
+}
+
+.chroma-sync-test-connection.error {
+    color: var(--text-error);
+}
+
+.chroma-sync-logs {
+    background: var(--background-primary-alt);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    padding: 10px;
+    font-family: var(--font-monospace);
+    font-size: 12px;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+
+/* Ribbon button states */
+.chroma-sync-ribbon-button {
+    transition: color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.chroma-sync-ribbon-button:hover {
+    transform: scale(1.05);
+}
+
+.chroma-sync-ribbon-button.syncing {
+    color: var(--text-accent);
+}
+
+.chroma-sync-ribbon-button.paused {
+    color: var(--text-warning);
+}
+
+.chroma-sync-ribbon-button.error {
+    color: var(--text-error);
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+@keyframes fade {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.5;
+    }
+}

@@ -152,7 +152,7 @@ export class ChromaSyncSettingsTab extends PluginSettingTab {
 			.setName('Exclude Patterns')
 			.setDesc('Glob patterns for files to exclude (one per line)')
 			.addTextArea(text => text
-				.setPlaceholder('**/.obsidian/**\n**/node_modules/**')
+				.setPlaceholder(`**/${this.app.vault.configDir}/**\n**/node_modules/**`)
 				.setValue(this.plugin.settings.excludeGlobs.join('\n'))
 				.onChange(async (value) => {
 					this.plugin.settings.excludeGlobs = value.split('\n').filter(line => line.trim());

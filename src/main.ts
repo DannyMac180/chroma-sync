@@ -3,7 +3,8 @@ import {
 	Notice,
 	addIcon,
 	setIcon,
-	TFile
+	TFile,
+	Platform
 } from 'obsidian';
 import { join } from 'path';
 import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
@@ -18,7 +19,7 @@ import { DocumentChunker } from './document-chunker';
 export default class ChromaSyncPlugin extends Plugin {
 	settings: ChromaSyncSettings;
 	deltaEngine: DeltaEngine;
-	runner: ChromaRunner;
+	runner: ChromaRunner | null = null;
 	statusBarItem: HTMLElement;
 	ribbonIconEl: HTMLElement;
 	isRunning: boolean = false;
@@ -33,6 +34,14 @@ export default class ChromaSyncPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+
+		// Normalize exclude globs to use the configured configDir
+		if (Array.isArray(this.settings.excludeGlobs)) {
+			const cfg = this.app.vault.configDir;
+			this.settings.excludeGlobs = this.settings.excludeGlobs.map(p =>
+				p === '**/.obsidian/**' ? `**/${cfg}/**` : p
+			);
+		}
 		
 		// Initialize components
 		this.deltaEngine = new DeltaEngine(
@@ -41,11 +50,13 @@ export default class ChromaSyncPlugin extends Plugin {
 			this.settings.excludeGlobs
 		);
 		
-		this.runner = new ChromaRunner(
-			this.settings,
-			this.getPluginDataPath(),
-			this.onProgressUpdate.bind(this)
-		);
+		if (Platform.isDesktopApp) {
+			this.runner = new ChromaRunner(
+				this.settings,
+				this.getPluginDataPath(),
+				this.onProgressUpdate.bind(this)
+			);
+		}
 
 		this.contentProcessor = new ContentProcessorFactory();
 		this.documentChunker = new DocumentChunker();
@@ -118,25 +129,31 @@ export default class ChromaSyncPlugin extends Plugin {
 		// Add settings tab
 		this.addSettingTab(new ChromaSyncSettingsTab(this.app, this));
 
-		// Ensure plugin data directory exists
-		this.ensureDataDirectory();
-
-		// Check for existing session on startup
-		this.checkExistingSession();
+		// Ensure plugin data directory exists (desktop only)
+		if (Platform.isDesktopApp) {
+			this.ensureDataDirectory();
+			// Check for existing session on startup
+			this.checkExistingSession();
+		} else {
+			this.log('warn', 'Chroma Sync requires desktop. Some features are disabled on mobile.');
+			this.updateStatusBar('Desktop only');
+		}
 
 		// Schedule initial sync after layout is ready
 		if (this.settings.runOnOpen) {
-			this.app.workspace.onLayoutReady(() => {
-				this.log('info', 'Workspace ready, scheduling initial sync...');
-				// Delay initial sync to avoid blocking startup
-				setTimeout(() => {
-					this.autoSync();
-				}, 2000);
-			});
+		this.app.workspace.onLayoutReady(() => {
+		this.log('info', 'Workspace ready, scheduling initial sync...');
+		// Delay initial sync to avoid blocking startup
+		setTimeout(() => {
+		this.autoSync();
+		}, 2000);
+		});
 		}
-
-		// Schedule periodic verification (daily)
-		this.scheduleVerification();
+		
+		// Schedule periodic verification (daily, desktop only)
+		if (Platform.isDesktopApp) {
+			this.scheduleVerification();
+		}
 
 		this.log('info', 'Chroma Sync plugin loaded');
 	}
@@ -204,6 +221,7 @@ export default class ChromaSyncPlugin extends Plugin {
 	}
 
 	async manualSync(): Promise<void> {
+		if (!this.ensureDesktopOrNotify()) return;
 		if (this.isRunning) {
 			new Notice('Sync already in progress');
 			return;
@@ -214,6 +232,7 @@ export default class ChromaSyncPlugin extends Plugin {
 	}
 
 	private async autoSync(): Promise<void> {
+		if (!this.ensureDesktopOrNotify()) return;
 		if (this.isRunning) {
 			return;
 		}
@@ -288,6 +307,14 @@ export default class ChromaSyncPlugin extends Plugin {
 		}
 	}
 
+	private ensureDesktopOrNotify(): boolean {
+		if (!Platform.isDesktopApp) {
+			new Notice('Chroma Sync is only available on desktop.');
+			return false;
+		}
+		return true;
+	}
+
 	private updateStatusBar(text: string, status?: 'syncing' | 'error' | 'paused' | 'stopping'): void {
 		this.statusBarItem.setText(`Chroma: ${text}`);
 		this.statusBarItem.removeClass('syncing', 'error', 'paused', 'stopping');
@@ -300,11 +327,11 @@ export default class ChromaSyncPlugin extends Plugin {
 		// Use the plugin's current directory as the data folder
 		const adapter = this.app.vault.adapter as any;
 		const basePath = adapter.basePath || adapter.getBasePath?.() || '.';
-		const pluginDir = join(basePath, '.obsidian', 'plugins', 'chroma-sync');
+		const pluginDir = join(basePath, this.app.vault.configDir, 'plugins', 'chroma-sync');
 		
 		// For development/installed plugins, use the plugin directory itself
 		// Check if we're already in the plugin directory
-		const currentDir = process.cwd();
+		const currentDir = typeof process !== 'undefined' ? process.cwd() : '';
 		if (currentDir.includes('obsidian-chroma-sync') || currentDir.includes('chroma-sync')) {
 			return currentDir;
 		}
@@ -438,6 +465,7 @@ ${logs}
 	 * Handle ribbon icon clicks based on current state
 	 */
 	private async handleRibbonClick(): Promise<void> {
+		if (!this.ensureDesktopOrNotify() || !this.runner) return;
 		const stateManager = this.runner.getStateManager();
 		
 		if (stateManager.canResume()) {
@@ -468,6 +496,7 @@ ${logs}
 	 * Resume a paused sync
 	 */
 	private async resumeSync(): Promise<void> {
+		if (!this.ensureDesktopOrNotify() || !this.runner) return;
 		this.currentSyncState = 'running';
 		this.updateRibbonIcon();
 		this.updateStatusBar('Resuming...', 'syncing');
@@ -504,6 +533,7 @@ ${logs}
 	 * Stop the current sync
 	 */
 	private stopSync(): void {
+		if (!this.ensureDesktopOrNotify() || !this.runner) return;
 		if (this.runner.stopSync()) {
 			this.currentSyncState = 'stopping';
 			this.updateRibbonIcon();
@@ -550,18 +580,25 @@ ${logs}
 	private updateRibbonIcon(): void {
 		if (!this.ribbonIconEl) return;
 
+		if (!this.runner) {
+			this.ribbonIconEl.replaceChildren();
+			setIcon(this.ribbonIconEl, 'stop');
+			this.ribbonIconEl.setAttribute('aria-label', 'Desktop only');
+			return;
+		}
+		
 		const stateManager = this.runner.getStateManager();
 		
 		if (stateManager.canResume()) {
-			this.ribbonIconEl.innerHTML = '';
+			this.ribbonIconEl.replaceChildren();
 			setIcon(this.ribbonIconEl, 'play');
 			this.ribbonIconEl.setAttribute('aria-label', 'Resume sync');
 		} else if (stateManager.canPause()) {
-			this.ribbonIconEl.innerHTML = '';
+			this.ribbonIconEl.replaceChildren();
 			setIcon(this.ribbonIconEl, 'pause');
 			this.ribbonIconEl.setAttribute('aria-label', 'Pause sync');
 		} else {
-			this.ribbonIconEl.innerHTML = '';
+			this.ribbonIconEl.replaceChildren();
 			setIcon(this.ribbonIconEl, 'refresh-ccw');
 			this.ribbonIconEl.setAttribute('aria-label', 'Sync to Chroma');
 		}
@@ -576,6 +613,7 @@ ${logs}
 		}
 
 		this.progressUpdateInterval = window.setInterval(() => {
+			if (!this.runner) return;
 			const progress = this.runner.getSyncProgress();
 			if (progress) {
 				this.updateStatusBarFromProgress(progress);
@@ -625,6 +663,7 @@ ${logs}
 	 * Verify sync consistency with Chroma
 	 */
 	private async verifySync(): Promise<void> {
+		if (!this.ensureDesktopOrNotify() || !this.runner) return;
 		if (this.isRunning) {
 			new Notice('Cannot verify while sync is running');
 			return;
@@ -698,6 +737,7 @@ ${logs}
 	private scheduleVerification(): void {
 		// Check every hour for verification needs
 		this.verificationInterval = window.setInterval(async () => {
+			if (!Platform.isDesktopApp) return;
 			const fileState = this.loadFileState();
 			if (fileState && this.deltaEngine.needsVerification(fileState) && !this.isRunning) {
 				this.log('info', 'Automatic verification triggered');

@@ -25,6 +25,11 @@ const mockVault: any = {
 		stat: mockVault.files.get(path)?.stats || { mtime: 0, size: 0 },
 		extension: (path as string).split('.').pop() || '',
 	})),
+	getFileByPath: jest.fn((path: string) => ({
+		path,
+		stat: mockVault.files.get(path)?.stats || { mtime: 0, size: 0 },
+		extension: (path as string).split('.').pop() || '',
+	})),
 };
 
 // Helper to add files to mock vault

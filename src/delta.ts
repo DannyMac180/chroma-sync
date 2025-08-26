@@ -47,15 +47,15 @@ export interface DeltaPlan {
 }
 
 export class DeltaEngine {
-	private vault: Vault;
-	private includeGlobs: string[];
-	private excludeGlobs: string[];
+private vault: Vault;
+private includeGlobs: string[];
+private excludeGlobs: string[];
 
-	constructor(vault: Vault, includeGlobs: string[] = ['**/*.md'], excludeGlobs: string[] = ['**/.obsidian/**']) {
-		this.vault = vault;
-		this.includeGlobs = includeGlobs;
-		this.excludeGlobs = excludeGlobs;
-	}
+constructor(vault: Vault, includeGlobs?: string[], excludeGlobs?: string[]) {
+this.vault = vault;
+this.includeGlobs = includeGlobs ?? ['**/*.md'];
+this.excludeGlobs = excludeGlobs ?? [`**/${vault.configDir}/**`];
+}
 
 	public updateGlobs(includeGlobs: string[], excludeGlobs: string[]): void {
 		this.includeGlobs = includeGlobs;
@@ -151,7 +151,11 @@ export class DeltaEngine {
 			
 			if (!previousMeta) {
 				// New file
-				const file = this.vault.getAbstractFileByPath(path) as TFile;
+				const file = this.vault.getFileByPath(path);
+				if (!file) {
+					// Not a file or no longer exists; skip
+					continue;
+				}
 				const content = await this.vault.read(file);
 				
 				actions.push({
@@ -170,7 +174,11 @@ export class DeltaEngine {
 				stats.added++;
 			} else if (currentMeta.hash !== previousMeta.hash) {
 				// Updated file
-				const file = this.vault.getAbstractFileByPath(path) as TFile;
+				const file = this.vault.getFileByPath(path);
+				if (!file) {
+					// Not a file or no longer exists; skip
+					continue;
+				}
 				const content = await this.vault.read(file);
 				
 				actions.push({

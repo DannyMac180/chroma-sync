@@ -1,4 +1,5 @@
 import { spawn, ChildProcess } from 'child_process';
+import { Platform } from 'obsidian';
 import { Notice } from 'obsidian';
 import { join } from 'path';
 import { ChromaSyncSettings } from './settings';
@@ -669,8 +670,7 @@ export class ChromaRunner {
 	}
 
 	private getVenvPython(venvPath: string): string {
-		const platform = process.platform;
-		if (platform === 'win32') {
+		if ((Platform as any).isWin || (Platform as any).isWindows) {
 			return join(venvPath, 'Scripts', 'python.exe');
 		} else {
 			return join(venvPath, 'bin', 'python');
@@ -678,8 +678,7 @@ export class ChromaRunner {
 	}
 
 	private getVenvPip(venvPath: string): string {
-		const platform = process.platform;
-		if (platform === 'win32') {
+		if ((Platform as any).isWin || (Platform as any).isWindows) {
 			return join(venvPath, 'Scripts', 'pip.exe');
 		} else {
 			return join(venvPath, 'bin', 'pip');
