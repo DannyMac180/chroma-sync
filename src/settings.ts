@@ -35,7 +35,7 @@ export const DEFAULT_SETTINGS: ChromaSyncSettings = {
 	collection: 'obsidian_vault',
 	batchSize: 100,
 	includeGlobs: ['**/*.md'],
-	excludeGlobs: ['**/.obsidian/**'],
+	excludeGlobs: [],
 	pythonPath: 'python3',
 	runOnOpen: true,
 	tokenHeader: 'X-Chroma-Token',  // Use X-Chroma-Token by default as it works with ck- tokens

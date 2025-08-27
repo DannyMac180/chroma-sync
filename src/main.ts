@@ -36,11 +36,14 @@ export default class ChromaSyncPlugin extends Plugin {
 		await this.loadSettings();
 
 		// Normalize exclude globs to use the configured configDir
-		if (Array.isArray(this.settings.excludeGlobs)) {
+		{
 			const cfg = this.app.vault.configDir;
-			this.settings.excludeGlobs = this.settings.excludeGlobs.map(p =>
-				p === '**/.obsidian/**' ? `**/${cfg}/**` : p
-			);
+			const globs = Array.isArray(this.settings.excludeGlobs) ? [...this.settings.excludeGlobs] : [];
+			// Ensure configDir is excluded if not already covered
+			if (!globs.some(g => g.includes(`/${cfg}/`))) {
+				globs.push(`**/${cfg}/**`);
+			}
+			this.settings.excludeGlobs = globs;
 		}
 		
 		// Initialize components
